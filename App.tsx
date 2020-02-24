@@ -59,33 +59,38 @@ const AppContainer = createAppContainer(
 class App extends React.Component<IProps>{
   state = {
     token: null,
-    isLoading: true
+    isLoading: true,
+    notification: null
   }
   async componentDidMount() {
     AsyncStorage.getItem('authToken').then(response => {
       this.setState({ token: response, isLoading: false })
       console.log(response)
-      firebase.notifications().getInitialNotification().then(() => { });
+      if (response != null) {
+        firebase.notifications().getInitialNotification()
+          .then((notificationOpen) => {
+            if (notificationOpen) {
+              this.setState({notification: notificationOpen.notification.body})
+            }
+          });
+        firebase.notifications().onNotification((notification) => {
+          if (Platform.OS === "android")
+            notification
+              .android.setChannelId("awesome_channel")
+              .android.setSmallIcon('ic_launcher');
+          // Build a channel
+          const channelId = new firebase.notifications.Android.Channel("awesome_channel", "awesome_channel", firebase.notifications.Android.Importance.Max);
 
-      // if (response != null) {
-      //   console.log("1")
-      firebase.notifications().onNotification((notification) => {
-        if (Platform.OS === "android")
-          notification
-            .android.setChannelId("awesome_channel")
-            .android.setSmallIcon('ic_launcher');
-        // Build a channel
-        const channelId = new firebase.notifications.Android.Channel("awesome_channel", "awesome_channel", firebase.notifications.Android.Importance.Max);
-
-        // Create the channel
-        firebase.notifications().android.createChannel(channelId);
-        firebase.notifications().displayNotification(notification).then(()=>{}).catch((err)=>console.log(err))
-
-      });
-      firebase.notifications().onNotificationOpened((notificationOpen) => {
-        NavigationService.navigate('Activities', {})
-      });
-      // }
+          // Create the channel
+          firebase.notifications().android.createChannel(channelId);
+          firebase.notifications().displayNotification(notification).then(() => { }).catch((err) => console.log(err))
+          
+        });
+        firebase.notifications().onNotificationOpened((notificationOpen) => {
+          NavigationService.navigate('ActivityDetail', { activity: notificationOpen.notification.title,details:notificationOpen.notification.body })
+          
+        });
+      }
     })
   }
 

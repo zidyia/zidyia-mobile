@@ -15,7 +15,7 @@ import { login } from '../../redux/user/user.actions'
 import { AccessToken } from '../../redux/user/user.reducer'
 import { State } from '../../redux/user/user.reducer'
 import { styles } from './login.styles'
-import { required,email as isValidEmail } from '../../utils/validators';
+import { required, email as isValidEmail, password as isValidPassword } from '../../utils/validators';
 
 interface DispatchProps {
     login: (username: string, password: string) => void
@@ -36,37 +36,55 @@ class LoginScreen extends React.Component<Props> {
         email: '',
         password: '',
         emailValid: false,
-        passwordValid: false
+        passwordValid: false,
+        emailBorder: 'white',
+        passwordBorder: 'white'
     }
 
     render() {
         const { login } = this.props;
-        const { email, password, emailValid, passwordValid } = this.state;
+        const { email, password, emailBorder,passwordBorder } = this.state;
         return (
             <>
                 <StatusBar barStyle="dark-content" />
                 <View style={styles.container}>
                     <Input
-                        onChange={(email: string) => this.setState({ email })}
+                        onChange={(email: string) => {
+                            if (!required(email) || !isValidEmail(email)) {
+                                this.setState({ email, emailValid: false,emailBorder:'red' })
+                            }
+                            else {
+                                this.setState({ email, emailValid: true,emailBorder:'green' })
+                            }
+                        }}
                         val={email}
                         hint="Enter your email"
-                        style={{ width: width - 50, borderColor: emailValid ? 'green' : 'white' }}
+                        style={{
+                            width: width - 50,
+                            borderColor:emailBorder
+                        }}
                     />
                     <Input
-                        onChange={(password: string) => this.setState({ password })}
+                        onChange={(password: string) => {
+                            if (!required(password) || !isValidPassword(password)) {
+                                this.setState({ password, passwordValid: false,passwordBorder:'red' })
+                            }
+                            else {
+                                this.setState({ password, passwordValid: true,passwordBorder:'green' })
+                            }
+                        }}
                         val={password}
                         hint="Enter your password"
-                        style={{ width: width - 50, borderColor: passwordValid ? 'green' : 'white' }}
+                        style={{ width: width - 50, borderColor:passwordBorder }}
                         secureInput={true}
                     />
                     <Button
                         title="Login"
                         onPress={() => {
-                            if (!required(email) || !required(password)) {
-                                Alert.alert("Alert", "All Fields are required")
-                            }else if(!isValidEmail(email)){
-                                Alert.alert("Alert", "Please Enter a valid email address")
+                            if (!required(email) || !required(password) || !isValidEmail(email) || !isValidPassword(password)) {
+                                this.setState({ emailValid: false,passwordValid:false })
                             } else {
+                                this.setState({ emailValid: true,passwordValid:true })
                                 login(email, password)
                             }
                         }}
