@@ -33,59 +33,90 @@ type Props = StateProps & OwnProps & DispatchProps
 
 class LoginScreen extends React.Component<Props> {
     state = {
-        email: '',
-        password: '',
-        emailValid: false,
-        passwordValid: false,
-        emailBorder: 'white',
-        passwordBorder: 'white'
+        emailfield: {
+            email: '',
+            emailValid: false,
+            emailBorder: 'white'
+        },
+        passwordfield: {
+            password: '',
+            passwordValid: false,
+            passwordBorder: 'white'
+        }
     }
 
     render() {
         const { login } = this.props;
-        const { email, password, emailBorder,passwordBorder } = this.state;
+        const { email, emailBorder } = this.state.emailfield;
+        const { password, passwordBorder } = this.state.passwordfield;
         return (
             <>
                 <StatusBar barStyle="dark-content" />
                 <View style={styles.container}>
                     <Input
                         onChange={(email: string) => {
+                            let email_f = {...this.state.emailfield}
                             if (!required(email) || !isValidEmail(email)) {
-                                this.setState({ email, emailValid: false,emailBorder:'red' })
+                                email_f.email = email
+                                email_f.emailValid = false
+                                email_f.emailBorder = 'red'
+                                this.setState({ emailfield: email_f })
                             }
                             else {
-                                this.setState({ email, emailValid: true,emailBorder:'green' })
+                                email_f.email = email
+                                email_f.emailValid = true
+                                email_f.emailBorder = 'green'
+                                this.setState({ emailfield: email_f })
                             }
                         }}
                         val={email}
                         hint="Enter your email"
                         style={{
                             width: width - 50,
-                            borderColor:emailBorder
+                            borderColor: emailBorder
                         }}
                     />
                     <Input
                         onChange={(password: string) => {
+                            let password_f = {...this.state.passwordfield}
                             if (!required(password) || !isValidPassword(password)) {
-                                this.setState({ password, passwordValid: false,passwordBorder:'red' })
+                                password_f.password = password
+                                password_f.passwordValid = false
+                                password_f.passwordBorder = 'red'
+                                this.setState({ passwordfield: password_f })
                             }
                             else {
-                                this.setState({ password, passwordValid: true,passwordBorder:'green' })
+                                password_f.password = password
+                                password_f.passwordValid = true
+                                password_f.passwordBorder = 'green'
+                                this.setState({ passwordfield: password_f })
                             }
                         }}
                         val={password}
                         hint="Enter your password"
-                        style={{ width: width - 50, borderColor:passwordBorder }}
+                        style={{ width: width - 50, borderColor: passwordBorder }}
                         secureInput={true}
                     />
                     <Button
                         title="Login"
                         onPress={() => {
-                            if (!required(email) || !required(password) || !isValidEmail(email) || !isValidPassword(password)) {
-                                this.setState({ emailValid: false,passwordValid:false })
-                            } else {
-                                this.setState({ emailValid: true,passwordValid:true })
-                                login(email, password)
+                            if (!required(email) || !isValidEmail(email)) {
+                                let email_f = {...this.state.emailfield}
+                                email_f.emailBorder = 'red'
+                                this.setState({ emailfield: email_f })   
+                            }
+                             if(!required(password) || !isValidPassword(password)){
+                                let password_f = {...this.state.passwordfield}
+                                password_f.passwordBorder = 'red'
+                                this.setState({ passwordfield: password_f })
+                            } 
+                            else {
+                                let emailfield = {...this.state.emailfield}
+                                emailfield.emailBorder = 'green'
+                                let passwordfield = {...this.state.passwordfield}
+                                passwordfield.passwordBorder = 'green'
+                                this.setState({ emailfield,passwordfield })
+                                login(email, password) 
                             }
                         }}
                         style={{ width: width - 50 }}
